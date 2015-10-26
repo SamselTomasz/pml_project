@@ -4,14 +4,18 @@ author: "Tomasz Samsel"
 date: "10/25/2015"
 output: html_document
 ---
-split the r code into:
--load data
--clean data
--first approach
--second one
--generating txt files and writup 
 
-## load data
+## Lets start with:
+
+split the r code into:
+
+* load data
+* clean data
+* first approach
+* second one
+* generating txt files and writup 
+
+### load data
 ```{r, cache=TRUE}
 ## download files if they do not exist 
 if (!file.exists("pml_training.csv")) {
@@ -34,7 +38,7 @@ testing <- read.csv("pml-testing.csv", na.strings = c("NA", ""))
 dim(testing); dim(training)
 ```
 
-## clean data
+### clean data
 ```{r, cache=TRUE}
 ## load few libraries needed for further computations
 library(caret); library(rattle); library(rpart); library(rpart.plot)
@@ -59,7 +63,7 @@ my_training_2 <- my_training[, colSums(is.na(training)) == 0]
 my_training_2 <- my_training_2[, -c(1:7)]
 ```
 
-## first model
+### first model
 ```{r, cache=TRUE}
 ## fit the first model: rpart
 mod_fit_2 <- train(classe ~ ., method="rpart", data=my_training_2)
@@ -74,7 +78,7 @@ confusionMatrix(predictions_1, my_testing$classe)
         ## very low accuracy, only 49%
 ```
 
-## second model
+### second model
 ```{r, cache=TRUE}
 ## fit the random forest model instead of decision trees
 
@@ -90,9 +94,14 @@ mod_fit_3 <- randomForest(classe ~ ., data=my_training_2)
 prediction_2 <- predict(mod_fit_3, newdata=my_testing)
 confusionMatrix(prediction_2, my_testing$classe)
         ## excelent, 99.39% accuracy :)
+
+## it is hard to plot random forest, the way i find usefull without doing proximity
+## on the trees (which hangs my laptop dead) is this:
+plot(mod_fit_3, log="y")
+varImpPlot(mod_fit_3)
 ```
 
-## generating txt files over testing data provided
+### generating txt files over testing data provided
 ```{r, cache=TRUE}
 ## predict answers for file submission
 answers <- predict(mod_fit_3, newdata=testing)

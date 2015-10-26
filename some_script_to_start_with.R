@@ -65,6 +65,11 @@ prediction_2 <- predict(mod_fit_3, newdata=my_testing)
 confusionMatrix(prediction_2, my_testing$classe)
         ## excelent, 99.39% accuracy :)
 
+## it is hard to plot random forest, the way i find usefull without doing proximity
+## on the trees (which hangs my laptop dead) is this:
+plot(mod_fit_3, log="y")
+varImpPlot(mod_fit_3)
+
 ## predict answers for file submission
 answers <- predict(mod_fit_3, newdata=testing)
 answers
