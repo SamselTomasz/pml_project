@@ -12,7 +12,7 @@ split the r code into:
 -generating txt files and writup 
 
 ## load data
-```{r, echo=FALSE, cache=TRUE}
+```{r, cache=TRUE}
 ## download files if they do not exist 
 if (!file.exists("pml_training.csv")) {
         train_data_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
@@ -32,11 +32,10 @@ testing <- read.csv("pml-testing.csv", na.strings = c("NA", ""))
 
 ## lets look at the data to decide how to clean it
 dim(testing); dim(training)
-names(training)
 ```
 
 ## clean data
-```{r, echo=FALSE, cache=TRUE}
+```{r, cache=TRUE}
 ## load few libraries needed for further computations
 library(caret); library(rattle); library(rpart); library(rpart.plot)
 library(randomForest); library(repmis)
@@ -61,7 +60,7 @@ my_training_2 <- my_training_2[, -c(1:7)]
 ```
 
 ## first model
-```{r, echo=FALSE, cache=TRUE}
+```{r, cache=TRUE}
 ## fit the first model: rpart
 mod_fit_2 <- train(classe ~ ., method="rpart", data=my_training_2)
 
@@ -76,7 +75,7 @@ confusionMatrix(predictions_1, my_testing$classe)
 ```
 
 ## second model
-```{r, echo=FALSE, cache=TRUE}
+```{r, cache=TRUE}
 ## fit the random forest model instead of decision trees
 
 ## mod_fit_3 <- train(classe ~ ., method="rf", data=my_training_2, prox=TRUE, ntree=5)
@@ -94,7 +93,7 @@ confusionMatrix(prediction_2, my_testing$classe)
 ```
 
 ## generating txt files over testing data provided
-```{r, echo=FALSE, cache=TRUE}
+```{r, cache=TRUE}
 ## predict answers for file submission
 answers <- predict(mod_fit_3, newdata=testing)
 answers
