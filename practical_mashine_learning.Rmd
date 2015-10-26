@@ -4,20 +4,31 @@ author: "Tomasz Samsel"
 date: "10/25/2015"
 output: html_document
 ---
+fill the text later
 
-## 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r, echo=FALSE, cache=TRUE}
+## download files if they do not exist 
+if (!file.exists("pml_training.csv")) {
+        train_data_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+        dest_train_file <- "pml-training.csv"
+        download.file(train_data_url, dest_train_file)
+}
 
-```{r}
-summary(cars)
+if (!file.exists("pml_testing.csv")) {
+        test_data_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+        dest_test_file <- "pml-testing.csv"
+        download.file(test_data_url, dest_test_file)
+}
+
+## load them into memory
+training <- read.csv("pml-training.csv", na.strings = c("NA", ""))
+testing <- read.csv("pml-testing.csv", na.strings = c("NA", ""))
+
+## lets look at the data to decide how to clean it
+dim(testing); dim(training)
+names(training)
 ```
 
 You can also embed plots, for example:
 
-```{r, echo=FALSE}
-plot(cars)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
