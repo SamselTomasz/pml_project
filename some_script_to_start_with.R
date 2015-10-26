@@ -15,7 +15,7 @@ testing <- read.csv("pml-testing.csv", na.strings = c("NA", ""))
 dim(testing); dim(training)
 names(training)
 
-## load few librarys needed 
+## load few libraries needed 
 library(caret); library(rattle); library(rpart); library(rpart.plot)
 library(randomForest); library(repmis)
 
