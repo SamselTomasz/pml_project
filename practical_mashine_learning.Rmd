@@ -1,21 +1,29 @@
 ---
-title: "Practical Mashine Learning Project"
+title: "Practical Machine Learning Project"
 author: "Tomasz Samsel"
-date: "10/25/2015"
+date: "11/22/2015"
 output: html_document
 ---
+## Project writeup.
 
-## Lets start with:
+#### Background.
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, the goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website [here](http://groupware.les.inf.puc-rio.br/har). (see the section on the Weight Lifting Exercise Dataset).
 
-split the r code into:
+#### Data.
+The training data for this project are available [here](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv)
 
-* load data
-* clean data
-* first approach
-* second one
-* generating txt files and writup 
+The test data are available [here](https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv)
 
-### load data
+The data for this project come from this [source](http://groupware.les.inf.puc-rio.br/har). If you use this document for any purpose please cite them as they have been very generous in allowing their data to be used for this kind of projects.
+
+#### The goal of project.
+The goal of this project is to predict the manner in which participants did the exercise. This is the "classe" variable in the training set. Any of the other variables can be used to predict with. Finally prediction model to predict 20 different test cases will be created. For assigment purposes the code will generate 20 files with predicted manner of witch the excersize was perform. Test cases data is a test dataset. For link see above.
+
+## Loading and cleaning data.
+
+#### Loading data.
+The code below will check if data has been downloaded already. If not, it will download it, and load it to memory.
+Training dataset should contain just below 20000 cases of 160 variables. Test dataset should be exactly 20 cases long.
 ```{r, cache=TRUE}
 ## download files if they do not exist 
 if (!file.exists("pml_training.csv")) {
@@ -37,8 +45,8 @@ testing <- read.csv("pml-testing.csv", na.strings = c("NA", ""))
 ## lets look at the data to decide how to clean it
 dim(testing); dim(training)
 ```
-
-### clean data
+#### Cleaning data.
+Splitting data into training and testing datasets. Removing NA's and first 7 lines of data, as they have no predictive value. 
 ```{r, cache=TRUE}
 ## load few libraries needed for further computations
 library(caret); library(rattle); library(rpart); library(rpart.plot)
@@ -62,8 +70,14 @@ my_training_2 <- my_training[, colSums(is.na(training)) == 0]
 ## remove first 7 columns as they have no predictive value
 my_training_2 <- my_training_2[, -c(1:7)]
 ```
+## Generating models.
 
-### first model
+### First model: classification tree. 
+The first weapon of choise. It is fast, it is simple. Just about to find out how good it performs with given data.
+
+Start with fitting the model. Next see how it has been built. Print out the conditions for splitting nodes in the model, and wrap it up in eyecandy plot with fancyRpartPlot().
+
+The most important part of the first model, is to check it against saved test data selected from training data set. Printing summary of predicted values using confusionMatrix() will tell us some more about accuracy of the model, its error rate, will give us 95% confidence interval, p-value as well, as other usefull informations.
 ```{r, cache=TRUE}
 ## fit the first model: rpart
 mod_fit_2 <- train(classe ~ ., method="rpart", data=my_training_2)
@@ -77,8 +91,16 @@ predictions_1 <- predict(mod_fit_2, newdata=my_testing)
 confusionMatrix(predictions_1, my_testing$classe)
         ## very low accuracy, only 49%
 ```
+#### Summary of the first model.
+The accuracy for this model is very disapointing. with only 49.94% accuracy (50.06% error rate) it is actually better to flip a coin for guessing the outcome. 
+It might be coused by badly chosen model fit. It could be a influence of the way we treated NAs in data set. Before we come back to the data, and start different approach to deal with missing values, lets have a look if other model will perform better.
 
-### second model
+### Second model: random forests.
+The second approach is random forests. The model should perform better, then the previous one. If it wont, we will look for the couse of bad accuracy in the data cleaning process.
+
+Here we will fit the model and use it against test data. Again, use the autput of confusionMatrix() to read error rate and accuracy of predictions.
+
+I also found a way to visualize random forests models. As it is not as easy, as when plotting classification tree. The attempt is to show how the error rate drops down, depending on number of trees generated in the model.
 ```{r, cache=TRUE}
 ## fit the random forest model instead of decision trees
 
@@ -101,7 +123,12 @@ plot(mod_fit_3, log="y")
 varImpPlot(mod_fit_3)
 ```
 
-### generating txt files over testing data provided
+#### Summary of the second model.
+This time the overall accuracy is 99.43%. This is an excellent result. Proves that classification tree wasn't a good approach to deal with this data. With error rate lower then 1% for all classes, it is clear, that with this model we can generate the results for testing data for course assigment.
+
+## Prediction.
+
+Using testing data set, we generate 20 files. Each one will have a name coresponding to specific test case, and contain A, B, C or D letter, sugesting in witch manner the excersize was performed.
 ```{r, cache=TRUE}
 ## predict answers for file submission
 answers <- predict(mod_fit_3, newdata=testing)
@@ -119,4 +146,4 @@ pml_write_files = function(x){
 pml_write_files(answers)
 ```
 
-## done :)
+This completes the course project.

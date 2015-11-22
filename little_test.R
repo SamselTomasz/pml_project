@@ -31,13 +31,13 @@ to.dendrogram <- function(dfrep,rownum=1,height.increment=0.1){
 
 
 mod <- randomForest(Species ~ .,data=iris)
-tree <- getTree(mod_fit_3,1,labelVar=TRUE)
+tree <- getTree(mod,1,labelVar=TRUE)
 
 d <- to.dendrogram(tree)
 str(d)
 plot(d,center=TRUE,leaflab='none',edgePar=list(t.cex=1,p.col=NA,p.lty=0))
 
-## verry interesting way for plotting random forest. I do not recomend trying
+## very interesting way for plotting random forest. I do not recomend trying
 ## to plot mod_fit_3, as it is way to complicated to be able to see the dendrogram 
 ## on computer screen (better off to see it working with iris data, as the script 
 ## intend to do), but if you want to have fun, changing the script should be
