@@ -72,7 +72,7 @@ my_training_2 <- my_training_2[, -c(1:7)]
 ```
 ## Generating models.
 
-### First model: classification tree. 
+### First model: classification tree.
 The first weapon of choise. It is fast, it is simple. Just about to find out how good it performs with given data.
 
 Start with fitting the model. Next see how it has been built. Print out the conditions for splitting nodes in the model, and wrap it up in eyecandy plot with fancyRpartPlot().
