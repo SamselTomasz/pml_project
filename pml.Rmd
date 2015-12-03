@@ -36,7 +36,7 @@ library(rpart)
 library(rattle)
 library(randomForest)
 ```
-```{r, cashe=TRUE}
+```{r, cache=TRUE}
 ## download files if they do not exist 
 if (!file.exists("pml-training.csv")) {
         train_data_url <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
@@ -70,7 +70,7 @@ testing <- read.csv("pml-testing.csv", na.strings = c("NA", ""))
 
 #### Cleaning data.
 Time to have a look at the data to decide how to clean it.
-```{r, cashe=TRUE}
+```{r, cache=TRUE}
 # Print how many rows and columns we are dealing with at the starting point
 dim(training)
 # summary(training)
@@ -132,5 +132,103 @@ corrplot(plot_data,
 # Now we see there is no more strongly correlated variables.
 # Clean up
 rm("plot_data", "plot_color")
+```
+
+```{r, cache=TRUE}
+# Divide the dataset into data for training and testing the models
+
+inTrain <- createDataPartition(y=training$classe, p=0.6, list=FALSE)
+my_training <- training[inTrain, ]
+my_testing <- training[-inTrain, ]
+rm(inTrain)
+```
+# ----------------------------------------------------------------
+# fitting models - classification tree
+# ----------------------------------------------------------------
+
+```{r, cache=TRUE}
+# Fit the first model: rpart.
+mod_fit_1 <- train(classe ~ ., method="rpart", data=my_training)
+
+# Lets have a look how the regression tree has been built.
+print(mod_fit_1$finalModel)
+fancyRpartPlot(mod_fit_1$finalModel)
+
+# Predict testing values based on generated model and check accuracy.
+predictions_1 <- predict(mod_fit_1, newdata=my_testing)
+confusionMatrix(predictions_1, my_testing$classe)
+
+# Clean some memory.
+rm(mod_fit_1)
+rm(predictions_1)
+```
+
+# ----------------------------------------------------------------
+# fitting models - repeated K-fold cross-validation 
+# ----------------------------------------------------------------
+
+```{r, cache=TRUE}
+fitControl <- trainControl(## 10-fold CV
+        method = "repeatedcv",
+        number = 10,
+        ## repeated ten times
+        repeats = 10)
+
+gbmFit1 <- train(classe ~ ., data = my_training,
+                 method = "gbm",
+                 trControl = fitControl,
+                 ## This last option is actually one
+                 ## for gbm() that passes through
+                 verbose = TRUE)
+predictions_1 <- predict(gbmFit1, newdata=my_testing)
+confusionMatrix(predictions_1, my_testing$classe)
+
+# Clean up.
+rm(fitControl)
+rm(gbmFit1)
+```
+# ----------------------------------------------------------------
+# fitting models - random forests no tuning
+# ----------------------------------------------------------------
+
+```{r, cache=TRUE}
+## fit the random forest model instead of decision trees
+
+mod_fit_3 <- randomForest(classe ~ ., data=my_training_2)
+## much faster then "rf" from caret package, although returns error on my machine when used
+## with proximity=TRUE option. Not enought ram...
+
+## do the prediction 
+prediction_2 <- predict(mod_fit_3, newdata=my_testing)
+confusionMatrix(prediction_2, my_testing$classe)
+
+## it is hard to plot random forest, the way i find usefull without doing proximity
+## on the trees (which hangs my laptop dead) is this:
+plot(mod_fit_3, log="y")
+varImpPlot(mod_fit_3)
+`
+```
+
+# ----------------------------------------------------------------
+# fitting models - random forests - tuning and fitting
+# ----------------------------------------------------------------
+
+```{r, cache=TRUE}
+# model selection
+oob.err=double(13)
+test.err=double(13)
+for(mtry in 1:13){
+        fit=randomForest(classe ~ ., data=my_training,mtry=mtry,ntree=400)
+        oob.err[mtry]=fit$err.rate[400]
+        pred=predict(fit,my_testing)
+        test.err[mtry]=postResample(pred, my_testing$classe) [1]
+        cat(mtry," ")
+}
+
+matplot(1:mtry,cbind(test.err,1-oob.err),pch=19,col=c("red","blue"),type="b",ylab="Accuracy")
+legend("topleft",legend=c("Test","OOB"),pch=19,col=c("red","blue"))
+
+which(test.err==max(test.err), arr.ind=TRUE)
+which(1-oob.err==max(1-oob.err), arr.ind=TRUE)
 ```
 
