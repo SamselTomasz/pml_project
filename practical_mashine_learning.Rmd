@@ -89,7 +89,6 @@ fancyRpartPlot(mod_fit_2$finalModel)
 ## predict testing values based on generated model and check accuracy
 predictions_1 <- predict(mod_fit_2, newdata=my_testing)
 confusionMatrix(predictions_1, my_testing$classe)
-        ## very low accuracy, only 49%
 ```
 #### Summary of the first model.
 The accuracy for this model is very disapointing. with only 49.94% accuracy (50.06% error rate) it is actually better to flip a coin for guessing the outcome. 
@@ -115,7 +114,6 @@ mod_fit_3 <- randomForest(classe ~ ., data=my_training_2)
 ## do the prediction 
 prediction_2 <- predict(mod_fit_3, newdata=my_testing)
 confusionMatrix(prediction_2, my_testing$classe)
-        ## excelent, 99.39% accuracy :)
 
 ## it is hard to plot random forest, the way i find usefull without doing proximity
 ## on the trees (which hangs my laptop dead) is this:
